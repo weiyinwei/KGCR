@@ -38,7 +38,6 @@ def data_load(dataset):
     user_item_dict_train = np.load(dir_str+'/user_item_dict_train.npy', allow_pickle=True).item()
     h_r_dict = np.load(dir_str+'/h_r_dict.npy', allow_pickle=True).item()
     # u_e_list = np.load(dir_str+'/u_e_list.npy')
-    print('11111')
     u_e_list = np.load(dir_str+'/u_e_list_new.npy')
 
     kg_list = np.column_stack((kg_data[:,0], kg_data[:,2]))
