@@ -6,14 +6,9 @@ import random
 from Dataset import TrainDataset, data_load, KGDataset, AKGDataset
 from model import *
 from model_cf import *
-from DKGR import *
-from DKGR_new import *
-from DKGR_new_new import *
 from KGCR import *
-from KGCR_new import *
-# from model_var1 import Model
 from torch.utils.data import DataLoader
-from Train import train#, kg_train
+from Train import train
 from Full_rank import full_ranking
 # from torch.utils.tensorboard import SummaryWriter
 from prettytable import PrettyTable
@@ -99,41 +94,18 @@ if __name__ == '__main__':
     print('Data has been loaded.')
     ##########################################################################################################################################
     print(model_name)
-    if model_name == 'model':
-        model = Model(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_list, reg_weight, dim_E, alpha).cuda()
-    elif model_name == 'model_cf':
-        model = Model_CF(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_list, reg_weight, dim_E).cuda()
-    elif model_name == 'DKGR':
-        model = DKGR(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_list, att_weight, reg_weight, dim_E, alpha, beta,  margin).cuda()
-    elif model_name == 'DKGR_new':
-        model = DKGR_new(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_list, att_weight, reg_weight, dim_E, alpha, beta, margin).cuda()
-    elif model_name == 'DKGR_new_new':
-        model = DKGR_new_new(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_list, att_weight, reg_weight, dim_E, alpha, beta, margin).cuda()
-    elif model_name == 'KGCR':
-        dir_str = './datasets/' + data_path
-        e_e_list = np.load(dir_str+'/e_e_list.npy').tolist()
-        u_e_index = np.load(dir_str+'/all_u_a_list_new.npy').tolist()
-        u_e_value = np.load(dir_str+'/all_value_list_new.npy').tolist()
-        model = KGCR(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_index, u_e_value, e_e_list, reg_weight, dim_E, alpha, beta, margin).cuda()
-    elif model_name == 'KGCR_new':
-        dir_str = './datasets/' + data_path
-        e_e_list = np.load(dir_str+'/e_e_list.npy').tolist()
-        u_e_index = np.load(dir_str+'/all_u_a_list_new.npy').tolist()
-        u_e_value = np.load(dir_str+'/all_value_list_new.npy').tolist()
-        model = KGCR_new(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_index, u_e_value, e_e_list, reg_weight, dim_E, alpha, beta, margin).cuda()
+
+    model = KGCR(num_u, num_i, num_a, num_r, train_data, kg_data, relation_list, u_e_list, att_weight, reg_weight, dim_E, alpha, beta, margin).cuda()
     
     if has_pre_trained:
         pretrained_id_embed = torch.load('./datasets/pretrain/'+data_path+'/pretrained_id_embed.pt').cuda()
         model.id_embedding.data = pretrained_id_embed
-        print('2222')
         pretrained_item_rep = torch.load('./datasets/pretrain/'+data_path+'/item_rep.pt').cuda()
         model.item_pre.data = pretrained_item_rep
         pretrained_att_rep = torch.load('./datasets/pretrain/'+data_path+'/attribute.pt').cuda()
         model.attribute.data = pretrained_att_rep
         print('pretrained_id_embed has loaded ...')
 
-
-    print('#'*20)
     ##########################################################################################################################################
     optimizer = torch.optim.Adam([{'params': model.parameters(), 'lr': learning_rate}])
     ##########################################################################################################################################
@@ -146,8 +118,6 @@ if __name__ == '__main__':
     # pt = PrettyTable()
     # pt.field_names = ["Epoch", "Loss", "precision", "recall", "ndcg"]
     for epoch in range(num_epoch):
-        # if has_transE:
-        #     kg_train(epoch, len(KG_dataset), KG_dataloader, model, optimizer, batch_size, writer)
         loss = train(epoch, len(train_dataset), train_dataloader, model, optimizer, batch_size, writer)
 
         if torch.isnan(loss):
@@ -188,9 +158,6 @@ if __name__ == '__main__':
                     break
                 else:
                     num_decreases += 1
-    # print(pt)
-    # save_file.write('\r\n-----------Test Precition:{0:.4f} Recall:{1:.4f} NDCG:{2:.4f}-----------'.format(max_test_result[0], max_test_result[1], max_test_result[2]))
-
     test_result1 = full_ranking(epoch, model, test_data, user_item_dict_train, None, False, step, 1, model_name, 'Test/', writer)
     test_result3 = full_ranking(epoch, model, test_data, user_item_dict_train, None, False, step, 3, model_name, 'Test/', writer)
     test_result5 = full_ranking(epoch, model, test_data, user_item_dict_train, None, False, step, 5, model_name, 'Test/', writer)
