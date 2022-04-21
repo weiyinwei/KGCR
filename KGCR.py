@@ -40,10 +40,10 @@ class GCN(MessagePassing):
 
 
 
-class DKGR_new_new(torch.nn.Module):
+class KGCR(torch.nn.Module):
     def __init__(self, num_u, num_i, num_a, num_r, ui_data, ia_data, relation_list, ua_data, att_weight, reg_weight, dim_E, alpha, beta, margin):
         super(DKGR_new_new, self).__init__()
-        print('DKGR_new_new')
+        print('KGCR')
         self.alpha = alpha
         self.beta = beta
         self.margin = margin
