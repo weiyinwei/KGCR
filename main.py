@@ -4,8 +4,6 @@ import numpy as np
 import torch
 import random
 from Dataset import TrainDataset, data_load, KGDataset, AKGDataset
-from model import *
-from model_cf import *
 from KGCR import *
 from torch.utils.data import DataLoader
 from Train import train
